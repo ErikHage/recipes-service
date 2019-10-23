@@ -1,0 +1,44 @@
+{
+  "name": "recipies-service",
+  "version": "1.0.0",
+  "description": "APIs for recipe management",
+  "author": {
+    "name": "Erik Hage",
+    "email": "ehage4@gmail.com"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/server",
+    "lint": "eslint lib spec",
+    "lint-fix": "eslint --fix lib spec",
+    "test-unit": "mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
+    "test-int": "mocha --require spec/helpers/init spec/integration/rest/**/*.spec.js",
+    "coverage": "nyc --reporter=json-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
+    "coverage-check": "nyc check-coverage --reporter=text-summary -- mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
+    "coverage-update": "node bin/update-coverage.js",
+    "prepush": "npm run lint && npm run coverage"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "err": "^2.1.11",
+    "express": "^4.17.1",
+    "moment": "^2.24.0",
+    "superagent": "^5.1.0",
+    "uuid": "^3.3.3",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-react-hooks": "^2.2.0",
+    "husky": "^3.0.9",
+    "mocha": "^6.2.2",
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0"
+  }
+}
