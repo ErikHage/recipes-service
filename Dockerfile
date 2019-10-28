@@ -50,10 +50,8 @@ RUN mkdir -p ${HOME}/logs \
 
 COPY --from=buildStage ${HOME}/node_modules ${HOME}/node_modules
 COPY ./package.json ${HOME}/
-COPY ./database.json ${HOME}/
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
-COPY ./migrations ${HOME}/migrations
 
 ENV SERVICE_3000_NAME=rwbbc-web-server
 
