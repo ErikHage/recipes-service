@@ -16,13 +16,16 @@
     "coverage": "nyc --reporter=json-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-check": "nyc check-coverage --reporter=text-summary -- mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-update": "node bin/update-coverage.js",
-    "prepush": "npm run lint && npm run coverage"
+    "prepush": "npm run lint && npm run coverage && npm audit"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
     "err": "^2.1.11",
+    "errr": "^2.6.1",
     "express": "^4.17.1",
+    "joi": "^14.3.1",
     "moment": "^2.24.0",
+    "nyc": "^14.1.1",
     "superagent": "^5.1.0",
     "uuid": "^3.3.3",
     "winston": "^3.2.1"

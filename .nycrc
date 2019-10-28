@@ -1,0 +1,16 @@
+{
+  "statements": 0,
+  "branches": 0,
+  "functions": 0,
+  "lines": 0,
+  "exclude": [
+    "node_modules",
+    "bin",
+    "spec",
+    "**/*.spec.js",
+    "lib/app.js",
+    "lib/routes.js"
+  ],
+  "check-coverage": true,
+  "report-dir": "spec/coverage"
+}

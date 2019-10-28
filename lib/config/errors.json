@@ -1,0 +1,7 @@
+{
+  "VALIDATION_ERROR": {
+    "type": "Validation",
+    "message": "Error during validation",
+    "status": 400
+  }
+}
