@@ -29,10 +29,7 @@ RUN mkdir -p ${HOME}/spec/coverage \
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
 
-RUN npm run lint \
-  && npm run coverage \
-  && npm run coverage-check \
-  && npm prune --production
+RUN npm prune --production
 
 USER ${SWUSER}
 
