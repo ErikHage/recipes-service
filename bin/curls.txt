@@ -1,0 +1,4 @@
+curl http://localhost:3000/recipes/dfbd16780518416616ff691b04986993e0ea0604
+
+
+curl http://localhost:3000/recipes
