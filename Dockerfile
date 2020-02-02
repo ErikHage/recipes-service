@@ -28,11 +28,9 @@ USER root
 ENV HOME=/srv/package \
     NODE=node
 
-RUN groupadd -r ${NODE} -g 433 \
-  && useradd -u 431 -r -g ${NODE} -d /srv/package -s /bin/bash -c "Docker image user" ${NODE} \
+RUN useradd -u 431 -r -g ${NODE} -d /srv/package -s /bin/bash -c "Docker image user" ${NODE} \
   && mkdir -p /srv/package \
-  && mkdir -p /srv/utils \
-  && chown -R ${NODE}:${NODE} /srv
+  && mkdir -p /srv/utils
 
 WORKDIR ${HOME}
 
@@ -43,6 +41,8 @@ COPY --from=buildStage ${HOME}/node_modules ${HOME}/node_modules
 COPY ./package.json ${HOME}/
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
+
+RUN chown -R ${NODE}:${NODE} /srv
 
 ENV SERVICE_3000_NAME=recipes-service
 
