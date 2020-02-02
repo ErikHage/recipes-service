@@ -5,13 +5,12 @@ ENV TERM=xterm \
 
 WORKDIR ${HOME}
 
-COPY ./package.json ${HOME}/package.json
-
 USER root
 
+COPY ./package.json ${HOME}/package.json
+
 RUN cd ${HOME} \
-    && npm install --loglevel info \
-    && chown -R ${NODE} ${HOME}/node_modules
+    && npm install --loglevel info
 
 ## Setup for running unit tests
 
@@ -31,8 +30,6 @@ COPY ./bin ${HOME}/bin
 
 RUN npm prune --production
 
-USER ${NODE}
-
 # Exposed Docker Image
 FROM node:10-slim
 
@@ -41,7 +38,14 @@ LABEL "Description" = "recipies-service"
 
 USER root
 
-ENV HOME=/srv/package
+ENV HOME=/srv/package \
+    NODE=node
+
+RUN groupadd -r ${NODE} -g 433 \
+  && useradd -u 431 -r -g ${NODE} -d /srv/package -s /bin/bash -c "Docker image user" ${NODE} \
+  && mkdir -p /srv/package \
+  && mkdir -p /srv/utils \
+  && chown -R ${NODE}:${NODE} /srv
 
 WORKDIR ${HOME}
 
