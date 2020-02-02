@@ -1,10 +1,11 @@
-const recipesController = require('../../../lib/controllers/recipes');
-const recipesService = require('../../../lib/services/recipes');
+const RecipesController = require('../../../lib/controllers/recipes');
+
 const serializer = require('../../../lib/serializers/recipes');
 
 const SOMETHING_WENT_WRONG = new Error('Something went wrong');
 
 describe('Recipes Controller', () => {
+  let recipesControllerInstance;
   let recipesServiceStub;
   let req;
   let res;
@@ -13,12 +14,17 @@ describe('Recipes Controller', () => {
   const recipeId = 'some-recipe-id';
 
   beforeEach(() => {
-    recipesServiceStub = sinon.stub(recipesService);
+    recipesServiceStub = {
+      getRecipes: sinon.stub(),
+      getRecipe: sinon.stub(),
+    };
     res = {
       status: sinon.stub().returnsThis(),
       send: sinon.stub().returnsThis(),
     };
     next = sinon.stub();
+
+    recipesControllerInstance = new RecipesController(recipesServiceStub);
   });
 
   afterEach(() => {
@@ -35,12 +41,12 @@ describe('Recipes Controller', () => {
 
       req = {};
 
-      await recipesController.getRecipes(req, res, next);
+      await recipesControllerInstance.getRecipes(req, res, next);
 
       expect(res.status).to.have.been.calledWith(200);
       expect(res.send).to.have.been.calledWith(serializerResponse);
       expect(next).to.not.have.been.called();
-      expect(recipesService.getRecipes).to.have.been.called();
+      expect(recipesServiceStub.getRecipes).to.have.been.called();
       expect(serializer.getRecipes.toResponse).to.have.been.calledWith(serviceResponse);
     });
 
@@ -49,12 +55,12 @@ describe('Recipes Controller', () => {
 
       req = {};
 
-      await recipesController.getRecipes(req, res, next);
+      await recipesControllerInstance.getRecipes(req, res, next);
 
       expect(res.status).to.not.have.been.called();
       expect(res.send).to.not.have.been.called();
       expect(next).to.have.been.calledWith(SOMETHING_WENT_WRONG);
-      expect(recipesService.getRecipes).to.have.been.called();
+      expect(recipesServiceStub.getRecipes).to.have.been.called();
     });
   });
 
@@ -72,12 +78,12 @@ describe('Recipes Controller', () => {
         },
       };
 
-      await recipesController.getRecipe(req, res, next);
+      await recipesControllerInstance.getRecipe(req, res, next);
 
       expect(res.status).to.have.been.calledWith(200);
       expect(res.send).to.have.been.calledWith(serializerResponse);
       expect(next).to.not.have.been.called();
-      expect(recipesService.getRecipe).to.have.been.calledWith(recipeId);
+      expect(recipesServiceStub.getRecipe).to.have.been.calledWith(recipeId);
       expect(serializer.getRecipe.toResponse).to.have.been.calledWith(serviceResponse);
     });
 
@@ -90,12 +96,12 @@ describe('Recipes Controller', () => {
         },
       };
 
-      await recipesController.getRecipe(req, res, next);
+      await recipesControllerInstance.getRecipe(req, res, next);
 
       expect(res.status).to.not.have.been.called();
       expect(res.send).to.not.have.been.called();
       expect(next).to.have.been.calledWith(SOMETHING_WENT_WRONG);
-      expect(recipesService.getRecipe).to.have.been.calledWith(recipeId);
+      expect(recipesServiceStub.getRecipe).to.have.been.calledWith(recipeId);
     });
   });
 });
