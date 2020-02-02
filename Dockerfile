@@ -28,8 +28,7 @@ USER root
 ENV HOME=/srv/package \
     NODE=node
 
-RUN useradd -u 431 -r -g ${NODE} -d /srv/package -s /bin/bash -c "Docker image user" ${NODE} \
-  && mkdir -p /srv/package \
+RUN mkdir -p /srv/package \
   && mkdir -p /srv/utils
 
 WORKDIR ${HOME}
