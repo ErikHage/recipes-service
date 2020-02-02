@@ -1,4 +1,4 @@
-FROM theferalrooster/nodejs-buildtools:8.9.0 AS buildStage
+FROM node:10 AS buildStage
 
 ENV TERM=xterm \
     HOME=/srv/package
@@ -34,7 +34,7 @@ RUN npm prune --production
 USER ${SWUSER}
 
 # Exposed Docker Image
-FROM theferalrooster/nodejs-base:8.9.0
+FROM node:10-slim
 
 MAINTAINER Erik Hage <ehage4@gmail.com>
 LABEL "Description" = "recipies-service"
