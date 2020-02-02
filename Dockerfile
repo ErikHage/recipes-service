@@ -12,19 +12,6 @@ COPY ./package.json ${HOME}/package.json
 RUN cd ${HOME} \
     && npm install --loglevel info
 
-## Setup for running unit tests
-
-COPY ./.eslintrc ${HOME}/.eslintrc
-COPY ./.eslintignore ${HOME}/.eslintignore
-COPY ./.nycrc ${HOME}/.nycrc
-COPY ./spec ${HOME}/spec
-
-RUN mkdir -p ${HOME}/spec/coverage \
-  && mkdir -p ${HOME}/spec/reports \
-  && mkdir -p ${HOME}/.nyc_output \
-  && chown -R ${NODE} ${HOME}/spec \
-  && chown -R ${NODE} ${HOME}/.nyc_output
-
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
 
@@ -57,7 +44,7 @@ COPY ./package.json ${HOME}/
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
 
-ENV SERVICE_3000_NAME=rwbbc-web-server
+ENV SERVICE_3000_NAME=recipes-service
 
 EXPOSE 3000
 
