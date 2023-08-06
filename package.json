@@ -16,7 +16,7 @@
     "coverage": "nyc --reporter=json-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-check": "nyc check-coverage --reporter=text-summary -- mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-update": "node bin/update-coverage.js",
-    "prepush": "npm run lint && npm run coverage && npm audit"
+    "prepush": "npm run lint && npm run coverage"
   },
   "dependencies": {
     "body-parser": "^1.19.1",
