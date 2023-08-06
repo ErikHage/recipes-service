@@ -4,6 +4,7 @@ describe('Recipes Serializer', () => {
   const recipeId = 'some-recipe-id';
   const filename = 'some-filename';
   const recipeName = 'some-recipe-name';
+  const filterMatchString = 'some match string';
 
   describe('#getRecipes', () => {
     describe('#toResponse', () => {
@@ -12,6 +13,7 @@ describe('Recipes Serializer', () => {
           sha: recipeId,
           filename,
           name: recipeName,
+          filterMatchString,
         }];
 
         const result = recipesSerializer.getRecipes.toResponse(recipes);
@@ -20,6 +22,7 @@ describe('Recipes Serializer', () => {
           recipeId,
           filename,
           recipeName,
+          filterMatchString,
         }]);
       });
     });

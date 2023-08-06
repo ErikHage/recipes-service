@@ -14,10 +14,13 @@ describe('Recipes Service', () => {
   const filename = 'some-filename';
   const sha = 'some-sha';
   const recipeId = 'some-recipe-id';
+  const keywords = ['keyword-1', 'keyword-2'];
+  const filterMatchString = `${name}.${keywords.join('.')}`;
 
   const recipePointer = {
     name,
     filename,
+    filterMatchString,
     sha,
   };
   const cachedRecipePointers = [recipePointer];
@@ -25,6 +28,7 @@ describe('Recipes Service', () => {
   const recipe = {
     name,
     filename,
+    keywords,
   };
 
   beforeEach(() => {
@@ -48,6 +52,7 @@ describe('Recipes Service', () => {
       it('should load the cache and update the refresh time', async () => {
         serviceInstance.cacheAll = undefined;
         datasourceStub.getRecipes.resolves(cachedRecipePointers);
+        datasourceStub.getRecipe.resolves(recipe);
 
         await serviceInstance.refreshCache();
 
@@ -55,14 +60,16 @@ describe('Recipes Service', () => {
         expect(serviceInstance.cacheAll).to.deep.equal([{
           name,
           filename,
+          filterMatchString,
           sha,
         }]);
         expect(serviceInstance.cache).to.deep.equal({
           [sha]: {
             name,
             filename,
+            keywords,
             sha,
-            refreshTime: moment().utc().subtract(1, 'minutes'),
+            refreshTime: moment().utc().add(12, 'hours'),
           },
         });
         expect(datasourceStub.getRecipes).to.have.been.called();
@@ -74,6 +81,7 @@ describe('Recipes Service', () => {
         serviceInstance.cacheAll = [''];
         serviceInstance.cacheRefreshTime = moment().utc().subtract(1, 'minutes');
         datasourceStub.getRecipes.resolves(cachedRecipePointers);
+        datasourceStub.getRecipe.resolves(recipe);
 
         await serviceInstance.refreshCache();
 
@@ -81,14 +89,16 @@ describe('Recipes Service', () => {
         expect(serviceInstance.cacheAll).to.deep.equal([{
           name,
           filename,
+          filterMatchString,
           sha,
         }]);
         expect(serviceInstance.cache).to.deep.equal({
           [sha]: {
             name,
             filename,
+            keywords,
             sha,
-            refreshTime: moment().utc().subtract(1, 'minutes'),
+            refreshTime: moment().utc().add(12, 'hours'),
           },
         });
         expect(datasourceStub.getRecipes).to.have.been.called();
