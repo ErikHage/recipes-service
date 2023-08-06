@@ -1,0 +1,5 @@
+filtering help
+  git clone repo?
+  need access to tags from file contents
+  can't load all files bc of 60/hour api limit
+  or authenticate with the API (Bearer token)
