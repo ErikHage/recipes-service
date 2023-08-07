@@ -8,6 +8,7 @@ WORKDIR ${HOME}
 USER root
 
 COPY ./package.json ${HOME}/package.json
+COPY ./package-lock.json ${HOME}/package-lock.json
 
 RUN cd ${HOME} \
     && npm install --loglevel info
@@ -38,6 +39,7 @@ RUN mkdir -p ${HOME}/logs \
 
 COPY --from=buildStage ${HOME}/node_modules ${HOME}/node_modules
 COPY ./package.json ${HOME}/
+COPY ./package-lock.json ${HOME}/
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
 
