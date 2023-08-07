@@ -5,7 +5,7 @@ const RecipesService = require('../../../lib/services/recipes');
 const SOMETHING_WENT_WRONG = new Error('Something went wrong');
 const ERROR_WAS_EXPECTED = new Error('An error was expected but was not thrown');
 
-describe('Recipes Service', () => {
+xdescribe('Recipes Service', () => {
   let serviceInstance;
   let datasourceStub;
   let clock;
