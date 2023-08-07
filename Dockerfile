@@ -1,4 +1,4 @@
-FROM node:10 AS buildStage
+FROM node:18 AS buildStage
 
 ENV TERM=xterm \
     HOME=/srv/package
@@ -11,7 +11,7 @@ COPY ./package.json ${HOME}/package.json
 COPY ./package-lock.json ${HOME}/package-lock.json
 
 RUN cd ${HOME} \
-    && npm install --loglevel info
+    && npm install
 
 COPY ./lib ${HOME}/lib
 COPY ./bin ${HOME}/bin
@@ -19,7 +19,7 @@ COPY ./bin ${HOME}/bin
 RUN npm prune --production
 
 # Exposed Docker Image
-FROM node:10-slim
+FROM node:18-slim
 
 MAINTAINER Erik Hage <ehage4@gmail.com>
 LABEL "Description" = "recipies-service"
