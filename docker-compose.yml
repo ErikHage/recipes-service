@@ -3,6 +3,8 @@ services:
   recipes-service:
     restart: always
     image: ehage/recipes-service:latest
+    environment:
+      - GITHUB_API_TOKEN=some-token
     ports:
       - "33456:3000"
     container_name: recipes-service
