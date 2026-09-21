@@ -128,6 +128,14 @@ describe('Recipe Cache', () => {
       });
     });
 
+    describe('when the recipe has an empty keywords list', () => {
+      it('should build the filterMatchString from the name only, with no trailing dot', () => {
+        cacheInstance.addRecipe(pancakesMetadata, { recipeName: 'Fluffy Pancakes', keywords: [] });
+
+        expect(cacheInstance.cache['sha-pancakes'].filterMatchString).to.equal('fluffy.pancakes');
+      });
+    });
+
     describe('when the sha is already cached', () => {
       it('should replace the existing entry', () => {
         cacheInstance.addRecipe(pancakesMetadata, pancakes);

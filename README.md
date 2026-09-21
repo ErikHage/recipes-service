@@ -10,7 +10,7 @@ A read-only REST API for recipes. The recipes are stored as JSON files in the `j
   - If a later refresh fails, the error is logged and the service keeps serving the previous cache.
 - **Derived fields:**
   - **Display name** comes from the filename (`tomato-soup.json` → `Tomato Soup`).
-  - **`filterMatchString`** is a lowercase string of the recipe name and keywords joined with `.` (e.g. `pancakes.breakfast.sweet`), for client-side search.
+  - **`filterMatchString`** is a lowercase string of the recipe name and keywords joined with `.` (e.g. `pancakes.breakfast.sweet`), for client-side search. A recipe with no keywords gets its name alone.
 - **CORS** is allowed from any origin.
 
 ## API
@@ -70,7 +70,13 @@ curl http://localhost:3000/api/recipes-service/recipes/3f9c2e...
 ```
 
 - If the recipe has no nutrition data, `nutrition` is `{}`.
-- An unknown `recipeId` returns `404` (`RECIPE_NOT_FOUND`). Errors are handled by Express's default error handler, so error bodies aren't JSON.
+- An unknown `recipeId` returns `404`:
+
+```json
+{ "errors": [{ "status": 404, "code": "RECIPE_NOT_FOUND", "source": "recipes-service", "message": "Recipe not found" }] }
+```
+
+Every error the API raises comes back as JSON in this `errors` shape. An unexpected failure returns `500` with a generic message, so internal details (e.g. from GitHub) aren't exposed. Paths outside the API still get Express's default HTML 404.
 
 ## Recipe file format
 
@@ -124,11 +130,30 @@ docker run -p 3000:3000 -e GITHUB_API_TOKEN=<your-github-token> recipes-service
 |----------------------------|-------------|
 | `npm run test:unit`        | Unit tests (`spec/unit`) |
 | `npm run test:integration` | Integration tests (`spec/integration`). They run the app in-process and mock GitHub with nock, so there's no network access. |
+| `npm run test:acceptance`  | Acceptance tests (`spec/acceptance`) against a running service. See below. |
 | `npm run lint`             | ESLint (airbnb-base). Use `lint-fix` to auto-fix. |
 | `npm run coverage`         | Unit test coverage, written to `spec/coverage` |
 | `npm run coverage-check`   | Runs the unit tests and enforces the thresholds in `.nycrc` |
 | `npm run coverage-update`  | Raises the thresholds in `.nycrc` to the current coverage |
 
-The tests set a dummy `GITHUB_API_TOKEN`, so no real token is needed.
+The unit and integration tests set a dummy `GITHUB_API_TOKEN`, so no real token is needed.
+
+### Acceptance tests
+
+Black-box tests that call the running service over real HTTP. They use the live recipes from GitHub, so they check shape and rules rather than specific recipes.
+
+```sh
+npm start                  # in one terminal; needs a valid GITHUB_API_TOKEN. Wait for "Recipe cache primed"
+npm run test:acceptance    # in another
+```
+
+They call `http://localhost:3000/api/recipes-service` by default. To change that, set `ACCEPTANCE_BASE_URL` (and optionally `ACCEPTANCE_REQUEST_TIMEOUT_MS`) in the shell or in `spec/helpers/acceptance/.env.acceptance`; see `.env.acceptance.example` there. Before any test runs, a check stops the suite with a message if the service is unreachable, returns an error, or has no recipes.
+
+**How they're organized:**
+- **Specs** (`spec/acceptance/`) are written as prose, using `"name: value"` steps.
+- **DSL modules** (`spec/helpers/acceptance/dsl/`) parse those steps with [`@feral-auth/ts-simple-dsl`](https://www.npmjs.com/package/@feral-auth/ts-simple-dsl). It's pinned to an exact version because it's a pre-1.0 alpha.
+- **Drivers** (`spec/helpers/acceptance/drivers/`) make the HTTP calls and hold every assertion.
+
+Nothing in the suite requires `lib/`. If the service gets something wrong, the test checks what it does today and is marked `// DocumentsCurrentBehavior`, with a note saying what it should do. There are none at the moment.
 
 Feature notes and decisions are kept in [`docs/`](docs/).

@@ -34,3 +34,13 @@ Unit tests cover every flow's branches and error cases. A coverage percentage is
 **Run:** `npm run test-unit`. To see uncovered branches: `npx nyc --reporter=text mocha --require spec/helpers/init "spec/unit/**/*.spec.js"`
 
 **Status:** 70 passing. Every in-scope file has 100% branch coverage. Integration tests: 6 passing.
+
+## 2026-09-21
+
+**Change:** Two service fixes, prompted by quirks the acceptance suite found (details in `docs/2026-09-21-acceptance-testing.md`), each with unit tests:
+- New `lib/middleware/error-handler.js` replies with a JSON `errors` body instead of Express's HTML page. Factory errors keep their status and `toObject()` body; other errors reply 500 with a generic message. New spec: `middleware/error-handler.spec.js` (factory error, plain error, exposed vs. hidden 4xx, out-of-range status, headers already sent).
+- `recipe-cache.js` no longer adds a trailing `.` to `filterMatchString` when `keywords` is `[]`. New case in `data/recipe-cache.spec.js`.
+
+**Run:** the script is now `npm run test:unit`.
+
+**Status:** 76 passing. Both changed files have 100% branch coverage.

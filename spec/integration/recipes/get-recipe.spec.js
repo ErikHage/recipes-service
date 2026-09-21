@@ -46,10 +46,20 @@ describe('GET /recipes/:recipeId (integration)', () => {
       consoleErrorStub.restore();
     });
 
-    it('should respond with a 404', async () => {
-      await request(app)
+    it('should respond with a 404 and a JSON error body', async () => {
+      const res = await request(app)
         .get(`${BASE_PATH}/recipes/does-not-exist`)
+        .expect('Content-Type', /json/)
         .expect(404);
+
+      expect(res.body).to.deep.equal({
+        errors: [{
+          status: 404,
+          code: 'RECIPE_NOT_FOUND',
+          source: 'recipes-service',
+          message: 'Recipe not found',
+        }],
+      });
     });
   });
 });
