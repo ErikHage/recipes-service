@@ -22,7 +22,7 @@ RUN npm prune --production
 FROM node:24-slim
 
 MAINTAINER Erik Hage <ehage4@gmail.com>
-LABEL "Description" = "recipies-service"
+LABEL "Description" = "recipes-service"
 
 USER root
 
