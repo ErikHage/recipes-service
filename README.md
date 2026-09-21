@@ -120,14 +120,14 @@ docker run -p 3000:3000 -e GITHUB_API_TOKEN=<your-github-token> recipes-service
 
 ## Development
 
-| Script                    | Description |
-|---------------------------|-------------|
-| `npm run test-unit`       | Unit tests (`spec/unit`) |
-| `npm run test-int`        | Integration tests (`spec/integration`). They run the app in-process and mock GitHub with nock, so there's no network access. |
-| `npm run lint`            | ESLint (airbnb-base). Use `lint-fix` to auto-fix. |
-| `npm run coverage`        | Unit test coverage, written to `spec/coverage` |
-| `npm run coverage-check`  | Runs the unit tests and enforces the thresholds in `.nycrc` |
-| `npm run coverage-update` | Raises the thresholds in `.nycrc` to the current coverage |
+| Script                     | Description |
+|----------------------------|-------------|
+| `npm run test:unit`        | Unit tests (`spec/unit`) |
+| `npm run test:integration` | Integration tests (`spec/integration`). They run the app in-process and mock GitHub with nock, so there's no network access. |
+| `npm run lint`             | ESLint (airbnb-base). Use `lint-fix` to auto-fix. |
+| `npm run coverage`         | Unit test coverage, written to `spec/coverage` |
+| `npm run coverage-check`   | Runs the unit tests and enforces the thresholds in `.nycrc` |
+| `npm run coverage-update`  | Raises the thresholds in `.nycrc` to the current coverage |
 
 The tests set a dummy `GITHUB_API_TOKEN`, so no real token is needed.
 
