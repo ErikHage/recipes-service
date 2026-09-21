@@ -1,4 +1,4 @@
-FROM node:18 AS buildStage
+FROM node:24 AS buildStage
 
 ENV TERM=xterm \
     HOME=/srv/package
@@ -19,7 +19,7 @@ COPY ./bin ${HOME}/bin
 RUN npm prune --production
 
 # Exposed Docker Image
-FROM node:18-slim
+FROM node:24-slim
 
 MAINTAINER Erik Hage <ehage4@gmail.com>
 LABEL "Description" = "recipies-service"
