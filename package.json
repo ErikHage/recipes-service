@@ -12,7 +12,7 @@
     "lint": "eslint lib spec",
     "lint-fix": "eslint --fix lib spec",
     "test-unit": "mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
-    "test-int": "mocha --require spec/helpers/init spec/integration/rest/**/*.spec.js",
+    "test-int": "mocha --require spec/helpers/integration/init \"spec/integration/**/*.spec.js\"",
     "coverage": "nyc --reporter=json-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-check": "nyc check-coverage --reporter=text-summary -- mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-update": "node bin/update-coverage.js",
@@ -43,8 +43,9 @@
     "eslint-plugin-react-hooks": "^2.2.0",
     "husky": "^3.0.9",
     "mocha": "^10.1.0",
-    "nock": "^11.7.2",
+    "nock": "^14.0.17",
     "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "supertest": "^7.2.2"
   }
 }
