@@ -46,10 +46,10 @@ describe('GET /recipes/:recipeId (integration)', () => {
       consoleErrorStub.restore();
     });
 
-    it('should respond with a 500 (current behavior)', async () => {
+    it('should respond with a 404', async () => {
       await request(app)
         .get(`${BASE_PATH}/recipes/does-not-exist`)
-        .expect(500);
+        .expect(404);
     });
   });
 });

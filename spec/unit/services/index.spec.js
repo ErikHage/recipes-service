@@ -1,223 +1,82 @@
-const moment = require('moment');
-
 const RecipesService = require('../../../lib/services/recipes');
+const logger = require('../../../lib/helpers/logging');
 
 const SOMETHING_WENT_WRONG = new Error('Something went wrong');
 const ERROR_WAS_EXPECTED = new Error('An error was expected but was not thrown');
 
-xdescribe('Recipes Service', () => {
+describe('Recipes Service', () => {
   let serviceInstance;
-  let datasourceStub;
-  let clock;
+  let recipesCacheStub;
 
-  const name = 'some-name';
-  const filename = 'some-filename';
-  const sha = 'some-sha';
   const recipeId = 'some-recipe-id';
-  const keywords = ['keyword-1', 'keyword-2'];
-  const filterMatchString = `${name}.${keywords.join('.')}`;
-
-  const recipePointer = {
-    name,
-    filename,
-    filterMatchString,
-    sha,
-  };
-  const cachedRecipePointers = [recipePointer];
-
-  const recipe = {
-    name,
-    filename,
-    keywords,
-  };
+  const recipe = { sha: recipeId, recipeName: 'some-recipe-name' };
 
   beforeEach(() => {
-    clock = sinon.useFakeTimers();
-
-    datasourceStub = {
-      getRecipes: sinon.stub(),
+    recipesCacheStub = {
       getRecipe: sinon.stub(),
+      getRecipesMetadata: sinon.stub(),
     };
+    sinon.stub(logger, 'error');
 
-    serviceInstance = new RecipesService(datasourceStub);
+    serviceInstance = new RecipesService(recipesCacheStub);
   });
 
   afterEach(() => {
-    clock.restore();
     sinon.restore();
   });
 
-  describe('#refreshCache', () => {
-    describe('when cache has never been loaded', () => {
-      it('should load the cache and update the refresh time', async () => {
-        serviceInstance.cacheAll = undefined;
-        datasourceStub.getRecipes.resolves(cachedRecipePointers);
-        datasourceStub.getRecipe.resolves(recipe);
+  describe('#getRecipes', () => {
+    it('should return the metadata from the cache', async () => {
+      const metadata = [{ sha: recipeId }];
+      recipesCacheStub.getRecipesMetadata.returns(metadata);
 
-        await serviceInstance.refreshCache();
+      const result = await serviceInstance.getRecipes();
 
-        expect(serviceInstance.cacheRefreshTime).to.deep.equal(moment().utc().add(12, 'hours'));
-        expect(serviceInstance.cacheAll).to.deep.equal([{
-          name,
-          filename,
-          filterMatchString,
-          sha,
-        }]);
-        expect(serviceInstance.cache).to.deep.equal({
-          [sha]: {
-            name,
-            filename,
-            keywords,
-            sha,
-            refreshTime: moment().utc().add(12, 'hours'),
-          },
-        });
-        expect(datasourceStub.getRecipes).to.have.been.called();
+      expect(result).to.equal(metadata);
+    });
+  });
+
+  describe('#getRecipe', () => {
+    describe('when the recipe is cached', () => {
+      it('should return the recipe', async () => {
+        recipesCacheStub.getRecipe.returns(recipe);
+
+        const result = await serviceInstance.getRecipe(recipeId);
+
+        expect(result).to.equal(recipe);
+        expect(recipesCacheStub.getRecipe).to.have.been.calledWith(recipeId);
       });
     });
 
-    describe('when cache refresh time is in the past', () => {
-      it('should load the cache and update the refresh time', async () => {
-        serviceInstance.cacheAll = [''];
-        serviceInstance.cacheRefreshTime = moment().utc().subtract(1, 'minutes');
-        datasourceStub.getRecipes.resolves(cachedRecipePointers);
-        datasourceStub.getRecipe.resolves(recipe);
-
-        await serviceInstance.refreshCache();
-
-        expect(serviceInstance.cacheRefreshTime).to.deep.equal(moment().utc().add(12, 'hours'));
-        expect(serviceInstance.cacheAll).to.deep.equal([{
-          name,
-          filename,
-          filterMatchString,
-          sha,
-        }]);
-        expect(serviceInstance.cache).to.deep.equal({
-          [sha]: {
-            name,
-            filename,
-            keywords,
-            sha,
-            refreshTime: moment().utc().add(12, 'hours'),
-          },
-        });
-        expect(datasourceStub.getRecipes).to.have.been.called();
-      });
-    });
-
-    describe('when cache refresh time is in the future', () => {
-      it('should do nothing', async () => {
-        serviceInstance.cacheAll = [''];
-        serviceInstance.cacheRefreshTime = moment().utc().add(1, 'minutes');
-
-        await serviceInstance.refreshCache();
-
-        expect(serviceInstance.cacheRefreshTime).to.deep.equal(moment().utc().add(1, 'minutes'));
-        expect(serviceInstance.cacheAll).to.deep.equal(['']);
-        expect(serviceInstance.cache).to.deep.equal({});
-        expect(datasourceStub.getRecipes).to.not.have.been.called();
-      });
-    });
-
-    describe('when an error occurs', () => {
-      it('should throw an error', async () => {
-        serviceInstance.cacheAll = [''];
-        serviceInstance.cacheRefreshTime = moment().utc().subtract(1, 'minutes');
-        datasourceStub.getRecipes.rejects(SOMETHING_WENT_WRONG);
+    describe('when the recipe is not cached', () => {
+      it('should throw a RECIPE_NOT_FOUND error', async () => {
+        recipesCacheStub.getRecipe.returns(undefined);
 
         try {
-          await serviceInstance.refreshCache();
+          await serviceInstance.getRecipe(recipeId);
         } catch (err) {
-          expect(err).to.be.equal(SOMETHING_WENT_WRONG);
-          expect(serviceInstance.cacheRefreshTime).to.deep.equal(moment().utc().subtract(1, 'minutes'));
-          expect(serviceInstance.cacheAll).to.deep.equal(['']);
-          expect(serviceInstance.cache).to.deep.equal({});
-          expect(datasourceStub.getRecipes).to.have.been.called();
+          expect(err.code).to.equal('RECIPE_NOT_FOUND');
+          expect(err.status).to.equal(404);
+          expect(err.stack).to.include(recipeId);
           return;
         }
         throw ERROR_WAS_EXPECTED;
       });
     });
-  });
 
-  describe('#getAndCacheRecipe', () => {
-    describe('when the refresh time is in the past', () => {
-      it('should refresh the recipe and return it', async () => {
-        serviceInstance.cache[recipeId] = {
-          ...recipe,
-          refreshTime: moment().utc().subtract(1, 'minutes'),
-        };
+    describe('when the cache throws', () => {
+      it('should log and rethrow the error', async () => {
+        recipesCacheStub.getRecipe.throws(SOMETHING_WENT_WRONG);
 
-        datasourceStub.getRecipe.resolves(recipe);
-
-        const result = await serviceInstance.getAndCacheRecipe(recipeId);
-
-        expect(result).to.deep.equal({
-          ...recipe,
-          sha: recipeId,
-          refreshTime: moment().utc().add(12, 'hours'),
-        });
-        expect(datasourceStub.getRecipe).to.have.been.calledWith(filename);
+        try {
+          await serviceInstance.getRecipe(recipeId);
+        } catch (err) {
+          expect(err).to.equal(SOMETHING_WENT_WRONG);
+          expect(logger.error).to.have.been.calledWith('error getting recipe', SOMETHING_WENT_WRONG);
+          return;
+        }
+        throw ERROR_WAS_EXPECTED;
       });
-    });
-
-    describe('when the refresh time is in the future', () => {
-      it('should return the recipe without refreshing it', async () => {
-        serviceInstance.cache[recipeId] = {
-          ...recipe,
-          sha,
-          refreshTime: moment().utc().add(1, 'minutes'),
-        };
-
-        const result = await serviceInstance.getAndCacheRecipe(recipeId);
-
-        expect(result).to.deep.equal({
-          ...recipe,
-          sha,
-          refreshTime: moment().utc().add(1, 'minutes'),
-        });
-        expect(datasourceStub.getRecipe).to.not.have.been.called();
-      });
-    });
-  });
-
-  describe('#getRecipes', () => {
-    it('should refresh the cache then return the cache contents', async () => {
-      serviceInstance.refreshCache = sinon.stub().resolves();
-      serviceInstance.cacheAll = cachedRecipePointers;
-
-      const result = await serviceInstance.getRecipes();
-
-      expect(result).to.be.equal(cachedRecipePointers);
-      expect(serviceInstance.refreshCache).to.have.been.called();
-    });
-  });
-
-  describe('#getRecipe', () => {
-    it('should refresh the cache then return the cache contents', async () => {
-      serviceInstance.refreshCache = sinon.stub().resolves();
-      serviceInstance.getAndCacheRecipe = sinon.stub().resolves(recipe);
-
-      const result = await serviceInstance.getRecipe(recipeId);
-
-      expect(result).to.be.equal(recipe);
-      expect(serviceInstance.refreshCache).to.have.been.called();
-      expect(serviceInstance.getAndCacheRecipe).to.have.been.calledWith(recipeId);
-    });
-
-    it('bubbles up errors from #getAndCacheRecipe', async () => {
-      serviceInstance.refreshCache = sinon.stub().resolves();
-      serviceInstance.getAndCacheRecipe = sinon.stub().rejects(SOMETHING_WENT_WRONG);
-
-      try {
-        await serviceInstance.getRecipe(recipeId);
-      } catch (err) {
-        expect(err).to.be.equal(SOMETHING_WENT_WRONG);
-        expect(serviceInstance.refreshCache).to.have.been.called();
-        expect(serviceInstance.getAndCacheRecipe).to.have.been.calledWith(recipeId);
-        return;
-      }
-      throw ERROR_WAS_EXPECTED;
     });
   });
 });

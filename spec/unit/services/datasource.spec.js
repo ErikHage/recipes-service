@@ -1,58 +1,57 @@
-const nock = require('nock');
-
 const RecipesDatasource = require('../../../lib/services/recipes/datasource');
+const gitApiHelper = require('../../../lib/helpers/git-api-access');
 
 const SOMETHING_WENT_WRONG = new Error('Something went wrong');
 const ERROR_WAS_EXPECTED = new Error('An error was expected but was not thrown');
 
-// TODO redo these tests for using octokit instead of superagent
-xdescribe('Recipes Datasource', () => {
+describe('Recipes Datasource', () => {
   let datasourceInstance;
+  let octokitStub;
 
   const filename = 'some-name.json';
   const name = 'Some Name';
   const sha = 'some-sha';
+  const repoParams = {
+    owner: 'ErikHage',
+    repo: 'my-recipes',
+  };
 
   beforeEach(() => {
+    octokitStub = {
+      request: sinon.stub(),
+    };
+    sinon.stub(gitApiHelper, 'getOctokit').returns(octokitStub);
+
     datasourceInstance = new RecipesDatasource();
   });
 
-  after(() => {
-    nock.restore();
+  afterEach(() => {
+    sinon.restore();
   });
 
   describe('#getRecipes', () => {
     describe('when a success response is received', () => {
-      it('should return the mapped response body', async () => {
-        const req = nock('https://api.github.com')
-          .get('/repos/ErikHage/my-recipes/contents/json?ref=master')
-          .reply(200, [{
-            name: filename,
-            sha,
-          }]);
+      it('should return the mapped metadata', async () => {
+        octokitStub.request.resolves({ data: [{ name: filename, sha }] });
 
         const result = await datasourceInstance.getRecipes();
 
-        expect(result).to.deep.equal([{
-          name,
-          filename,
-          sha,
-        }]);
-        expect(req.isDone()).to.be.true();
+        expect(result).to.deep.equal([{ name, filename, sha }]);
+        expect(octokitStub.request).to.have.been.calledWith(
+          'GET /repos/{owner}/{repo}/contents/json',
+          repoParams,
+        );
       });
     });
 
     describe('when an error response is received', () => {
       it('should bubble up the error', async () => {
-        const req = nock('https://api.github.com')
-          .get('/repos/ErikHage/my-recipes/contents/json?ref=master')
-          .replyWithError(SOMETHING_WENT_WRONG);
+        octokitStub.request.rejects(SOMETHING_WENT_WRONG);
 
         try {
           await datasourceInstance.getRecipes();
         } catch (err) {
-          expect(err).to.be.equal(SOMETHING_WENT_WRONG);
-          expect(req.isDone()).to.be.true();
+          expect(err).to.equal(SOMETHING_WENT_WRONG);
           return;
         }
         throw ERROR_WAS_EXPECTED;
@@ -61,38 +60,35 @@ xdescribe('Recipes Datasource', () => {
   });
 
   describe('#getRecipe', () => {
-    const recipe = {
-      recipeName: 'some-recipe-name',
-    };
-    const recipeJson = JSON.stringify(recipe);
+    const recipe = { recipeName: 'some-recipe-name' };
 
     describe('when a success response is received', () => {
-      it('should return the mapped response body', async () => {
-        const req = nock('https://api.github.com')
-          .get(`/repos/ErikHage/my-recipes/contents/json/${filename}?ref=master`)
-          .reply(200, {
-            content: recipeJson,
-            encoding: 'UTF-8',
-          });
+      it('should return the decoded file contents', async () => {
+        octokitStub.request.resolves({
+          data: {
+            content: Buffer.from(JSON.stringify(recipe)).toString('base64'),
+            encoding: 'base64',
+          },
+        });
 
         const result = await datasourceInstance.getRecipe(filename);
 
         expect(result).to.deep.equal(recipe);
-        expect(req.isDone()).to.be.true();
+        expect(octokitStub.request).to.have.been.calledWith(
+          'GET /repos/{owner}/{repo}/contents/json/{filename}',
+          { ...repoParams, filename },
+        );
       });
     });
 
     describe('when an error response is received', () => {
       it('should bubble up the error', async () => {
-        const req = nock('https://api.github.com')
-          .get(`/repos/ErikHage/my-recipes/contents/json/${filename}?ref=master`)
-          .replyWithError(SOMETHING_WENT_WRONG);
+        octokitStub.request.rejects(SOMETHING_WENT_WRONG);
 
         try {
           await datasourceInstance.getRecipe(filename);
         } catch (err) {
-          expect(err).to.be.equal(SOMETHING_WENT_WRONG);
-          expect(req.isDone()).to.be.true();
+          expect(err).to.equal(SOMETHING_WENT_WRONG);
           return;
         }
         throw ERROR_WAS_EXPECTED;

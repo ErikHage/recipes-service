@@ -32,3 +32,9 @@ Tests the running service end to end (Express app → controller → service →
 
 **Open notes**
 - An unknown recipe id currently returns 500, because the serializer throws on `undefined`. The test pins this behavior, so update it if the service gets a proper 404.
+
+## 2026-09-20
+
+**Change:** An unknown recipe id now returns **404** (`RECIPE_NOT_FOUND`). `RecipesService.getRecipe` throws it when the cache misses, and the serializer no longer crashes on `undefined`. `get-recipe.spec.js` now expects 404. This resolves the previous open note. Details are in `docs/unit-test-coverage.md`.
+
+**Status:** 6 passing.

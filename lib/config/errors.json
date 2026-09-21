@@ -3,5 +3,10 @@
     "type": "Validation",
     "message": "Error during validation",
     "status": 400
+  },
+  "RECIPE_NOT_FOUND": {
+    "type": "NotFound",
+    "message": "Recipe not found",
+    "status": 404
   }
 }

@@ -25,6 +25,10 @@ describe('Recipes Serializer', () => {
           filterMatchString,
         }]);
       });
+
+      it('should return an empty array when there are no recipes', async () => {
+        expect(recipesSerializer.getRecipes.toResponse([])).to.deep.equal([]);
+      });
     });
   });
 
@@ -79,6 +83,23 @@ describe('Recipes Serializer', () => {
           keywords,
           nutrition,
         });
+      });
+
+      it('should return an empty nutrition object when the recipe has none', async () => {
+        const recipe = {
+          sha: recipeId,
+          recipeName,
+          prep: kindValueObj,
+          cook: kindValueObj,
+          yield: kindValueObj,
+          ingredients,
+          steps,
+          keywords,
+        };
+
+        const result = recipesSerializer.getRecipe.toResponse(recipe);
+
+        expect(result.nutrition).to.deep.equal({});
       });
     });
   });
