@@ -38,3 +38,11 @@ Tests the running service end to end (Express app → controller → service →
 **Change:** An unknown recipe id now returns **404** (`RECIPE_NOT_FOUND`). `RecipesService.getRecipe` throws it when the cache misses, and the serializer no longer crashes on `undefined`. `get-recipe.spec.js` now expects 404. This resolves the previous open note. Details are in `docs/2026-09-20-unit-test-coverage.md`.
 
 **Status:** 6 passing.
+
+## 2026-09-21
+
+**Change:** Unknown recipe ids now get a JSON error body (`{ errors: [{ status: 404, code: 'RECIPE_NOT_FOUND', ... }] }`) from the new `lib/middleware/error-handler.js`. `get-recipe.spec.js` asserts that body and its JSON content type. The fix came from the acceptance suite; see `docs/2026-09-21-acceptance-testing.md`.
+
+**Run:** the script is now `npm run test:integration`.
+
+**Status:** 6 passing.

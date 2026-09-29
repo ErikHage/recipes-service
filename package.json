@@ -12,7 +12,8 @@
     "lint": "eslint lib spec",
     "lint-fix": "eslint --fix lib spec",
     "test:unit": "mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
-    "test:integration":"mocha --require spec/helpers/integration/init \"spec/integration/**/*.spec.js\"",
+    "test:integration": "mocha --require spec/helpers/integration/init \"spec/integration/**/*.spec.js\"",
+    "test:acceptance": "mocha --require spec/helpers/acceptance/init --timeout 15000 \"spec/acceptance/**/*.spec.js\"",
     "coverage": "nyc --reporter=json-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-check": "nyc --reporter=text-summary mocha --require spec/helpers/init \"spec/unit/**/*.spec.js\"",
     "coverage-update": "node bin/update-coverage.js",
@@ -29,6 +30,7 @@
     "winston": "^2.4.4"
   },
   "devDependencies": {
+    "@feral-auth/ts-simple-dsl": "0.0.1",
     "chai": "^4.2.0",
     "dirty-chai": "^2.0.1",
     "eslint": "^8.57.1",

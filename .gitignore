@@ -1,4 +1,5 @@
 *.env
+spec/helpers/acceptance/.env.acceptance
 
 .idea/*
 
