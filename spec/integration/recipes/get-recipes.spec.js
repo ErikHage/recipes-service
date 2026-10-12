@@ -1,36 +1,17 @@
-const request = require('supertest');
-
-const app = require('../../../lib/app');
-const githubMock = require('../../helpers/integration/github-mock');
-const { primeRecipeCache } = require('../../helpers/integration/recipe-cache');
-
-const BASE_PATH = '/api/recipes-service';
+const { createIntegrationDsl } = require('../../helpers/integration/dsl/integration-dsl');
 
 describe('GET /recipes (integration)', () => {
-  const [pancakes, tomatoSoup] = githubMock.recipes;
+  const {
+    github, recipeCache, recipes, cleanup,
+  } = createIntegrationDsl();
 
-  before(async () => {
-    await primeRecipeCache();
-  });
+  afterEach(cleanup);
 
-  it('should return metadata for every recipe', async () => {
-    const res = await request(app)
-      .get(`${BASE_PATH}/recipes`)
-      .expect(200);
+  it('lists a summary of every recipe GitHub serves', async () => {
+    await github.hasRecipe('recipe: pancakes', 'keywords: breakfast, sweet');
+    await github.hasRecipe('recipe: tomato-soup');
+    await recipeCache.refresh('expect: succeeds');
 
-    expect(res.body).to.have.deep.members([
-      {
-        recipeId: pancakes.sha,
-        filename: pancakes.filename,
-        recipeName: 'Pancakes',
-        filterMatchString: 'pancakes.breakfast.sweet',
-      },
-      {
-        recipeId: tomatoSoup.sha,
-        filename: tomatoSoup.filename,
-        recipeName: 'Tomato Soup',
-        filterMatchString: 'tomato.soup',
-      },
-    ]);
+    await recipes.checkListIsExactly('recipes: pancakes, tomato-soup');
   });
 });

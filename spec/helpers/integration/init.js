@@ -1,5 +1,12 @@
-require('../chai');
 const nock = require('nock');
+
+/**
+ * mocha --require for the integration suite: the environment the in-process
+ * app needs, set before anything loads lib/.
+ *
+ * Unlike the unit init, this sets up no global chai expect: only
+ * drivers/assertions.js asserts.
+ */
 
 process.env.LOGGING_LEVEL = 'error';
 // must be set before lib/ is loaded; dotenv will not override it with the real token

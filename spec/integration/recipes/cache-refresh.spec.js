@@ -1,39 +1,26 @@
-const nock = require('nock');
+const { createIntegrationDsl } = require('../../helpers/integration/dsl/integration-dsl');
 
-const dependencies = require('../../../lib/dependencies');
-const githubMock = require('../../helpers/integration/github-mock');
+describe('Recipe cache refresh from GitHub (integration)', () => {
+  const {
+    github, recipeCache, recipes, cleanup,
+  } = createIntegrationDsl();
 
-describe('Recipe cache refresh from github (integration)', () => {
-  afterEach(() => {
-    nock.cleanAll();
+  afterEach(cleanup);
+
+  it('fetches the listing and every recipe file', async () => {
+    await github.hasRecipe('recipe: pancakes');
+    await github.hasRecipe('recipe: tomato-soup');
+
+    await recipeCache.refresh('expect: succeeds');
+
+    await github.checkEveryFileWasFetched();
+    await recipes.checkRecipe('recipe: pancakes');
+    await recipes.checkRecipe('recipe: tomato-soup');
   });
 
-  describe('when github responds successfully', () => {
-    it('should fetch the listing and every recipe file', async () => {
-      githubMock.mockAllRecipes();
+  it('fails when GitHub returns an error', async () => {
+    await github.failsToList('status: 500');
 
-      await dependencies.recipeCache.refreshCache();
-
-      expect(nock.pendingMocks()).to.be.empty();
-      githubMock.recipes.forEach(({ sha }) => {
-        expect(dependencies.recipeCache.getRecipe(sha)).to.exist();
-      });
-    });
-  });
-
-  describe('when github returns an error', () => {
-    it('should reject refreshCache', async () => {
-      githubMock.mockListingError(500);
-
-      let error;
-      try {
-        await dependencies.recipeCache.refreshCache();
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).to.exist();
-      expect(error.status).to.equal(500);
-    });
+    await recipeCache.refresh('expect: is rejected');
   });
 });

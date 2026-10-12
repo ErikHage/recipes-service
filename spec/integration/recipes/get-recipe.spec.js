@@ -1,65 +1,30 @@
-const request = require('supertest');
-const sinon = require('sinon');
-
-const app = require('../../../lib/app');
-const githubMock = require('../../helpers/integration/github-mock');
-const { primeRecipeCache } = require('../../helpers/integration/recipe-cache');
-
-const BASE_PATH = '/api/recipes-service';
+const { createIntegrationDsl } = require('../../helpers/integration/dsl/integration-dsl');
 
 describe('GET /recipes/:recipeId (integration)', () => {
-  const [pancakes, tomatoSoup] = githubMock.recipes;
+  const {
+    github, recipeCache, recipes, cleanup,
+  } = createIntegrationDsl();
 
-  before(async () => {
-    await primeRecipeCache();
+  afterEach(cleanup);
+
+  it('returns the full recipe', async () => {
+    await github.hasRecipe('recipe: pancakes', 'keywords: breakfast, sweet');
+    await recipeCache.refresh('expect: succeeds');
+
+    await recipes.checkRecipe('recipe: pancakes');
   });
 
-  it('should return the full recipe', async () => {
-    const res = await request(app)
-      .get(`${BASE_PATH}/recipes/${pancakes.sha}`)
-      .expect(200);
+  it('returns an empty nutrition object when the recipe has none', async () => {
+    await github.hasRecipe('recipe: tomato-soup', 'nutrition: none');
+    await recipeCache.refresh('expect: succeeds');
 
-    expect(res.body).to.deep.equal({
-      recipeId: pancakes.sha,
-      ...pancakes.content,
-    });
+    await recipes.checkRecipe('recipe: tomato-soup');
   });
 
-  it('should return an empty nutrition object when the recipe has none', async () => {
-    const res = await request(app)
-      .get(`${BASE_PATH}/recipes/${tomatoSoup.sha}`)
-      .expect(200);
+  it('finds no recipe for an unknown id', async () => {
+    await github.hasRecipe('recipe: pancakes');
+    await recipeCache.refresh('expect: succeeds');
 
-    expect(res.body.recipeName).to.equal('Tomato Soup');
-    expect(res.body.nutrition).to.deep.equal({});
-  });
-
-  describe('when the recipe does not exist', () => {
-    let consoleErrorStub;
-
-    beforeEach(() => {
-      // error-logger middleware writes to console.error; keep test output clean
-      consoleErrorStub = sinon.stub(console, 'error');
-    });
-
-    afterEach(() => {
-      consoleErrorStub.restore();
-    });
-
-    it('should respond with a 404 and a JSON error body', async () => {
-      const res = await request(app)
-        .get(`${BASE_PATH}/recipes/does-not-exist`)
-        .expect('Content-Type', /json/)
-        .expect(404);
-
-      expect(res.body).to.deep.equal({
-        errors: [{
-          status: 404,
-          code: 'RECIPE_NOT_FOUND',
-          source: 'recipes-service',
-          message: 'Recipe not found',
-        }],
-      });
-    });
+    await recipes.checkUnknownRecipeIsNotFound();
   });
 });

@@ -138,6 +138,19 @@ docker run -p 3000:3000 -e GITHUB_API_TOKEN=<your-github-token> recipes-service
 
 The unit and integration tests set a dummy `GITHUB_API_TOKEN`, so no real token is needed.
 
+### Integration tests
+
+These tests run the app in-process with supertest and mock GitHub with nock. Each test declares the recipes GitHub serves, then loads them into the app's cache:
+
+```js
+await github.hasRecipe('recipe: tomato-soup', 'nutrition: none');
+await recipeCache.refresh('expect: succeeds');
+
+await recipes.checkRecipe('recipe: tomato-soup');
+```
+
+They're organized like the acceptance tests below: specs in `spec/integration/`, with DSL modules, drivers and support in `spec/helpers/integration/`. Since the recipes are fixtures, drivers check exact values. After each test, `cleanup` removes the mocks and empties the app's recipe cache. `lib/` is required only by `spec/helpers/integration/support/app.js` and `init.js`.
+
 ### Acceptance tests
 
 Black-box tests that call the running service over real HTTP. They use the live recipes from GitHub, so they check shape and rules rather than specific recipes.
