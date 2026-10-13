@@ -8,6 +8,7 @@
   },
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "start": "node ./bin/server",
     "lint": "eslint lib spec",
     "lint-fix": "eslint --fix lib spec",
@@ -36,12 +37,17 @@
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.32.0",
-    "husky": "^3.0.9",
+    "husky": "^9.1.7",
     "mocha": "^12.0.2",
     "nock": "^14.0.17",
     "nyc": "^18.0.0",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "supertest": "^7.2.2"
+  },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.1.0"
+    }
   }
 }
