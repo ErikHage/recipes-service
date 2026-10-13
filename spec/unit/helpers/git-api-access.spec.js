@@ -5,7 +5,7 @@ const MODULE_PATH = '../../../lib/helpers/git-api-access';
 // the token check runs at module load, so each test reloads the module
 const loadModule = () => {
   delete require.cache[require.resolve(MODULE_PATH)];
-  // eslint-disable-next-line global-require, import/no-dynamic-require
+  // eslint-disable-next-line n/global-require
   return require(MODULE_PATH);
 };
 
@@ -45,7 +45,7 @@ describe('Git API Access', () => {
     it('should log an error and exit with code 1', () => {
       delete process.env.GITHUB_API_TOKEN;
       // keep dotenv from loading a real token out of .env
-      sinon.stub(require('dotenv'), 'config'); // eslint-disable-line global-require
+      sinon.stub(require('dotenv'), 'config'); // eslint-disable-line n/global-require
 
       loadModule();
 

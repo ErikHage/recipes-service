@@ -47,3 +47,24 @@ Keeps dependencies free of known vulnerabilities without breaking the consumer (
 **Open notes**
 - The Docker build runs `npm install` with no `.git` present. husky 9's `prepare` should just print a notice and exit 0 there, but this hasn't been checked because Docker isn't installed locally.
 - Remove the `overrides` entry once `@istanbuljs/load-nyc-config` moves to js-yaml 4.
+
+## 2026-10-12 — Clear npm deprecation warnings
+
+**Goal:** Clear the `npm warn deprecated` lines that `npm ci` prints.
+
+**Result:** a clean `npm ci` went from **10** deprecation warnings to **1**. `npm audit` stays at 0.
+
+**Changes**
+- **Dev:** sinon 7 → **22**. This removes nise 1 and the deprecated `@sinonjs/text-encoding`, and clears the "sinon 7" item under 2026-09-21's "Left as is". No spec changes were needed.
+- **Dev:** chai 4.3.7 → **4.5.0** (deprecated loupe 2.3.6 → 2.3.7). chai stays on major 4: chai 5 and later is ESM-only, and moving would also need new majors of sinon-chai and dirty-chai, neither of which is deprecated.
+- **Dev:** ESLint 8 → **10**, and **airbnb-base is dropped**. This **supersedes** 2026-09-21's decision to decline ESLint 9/10. That decision waited on airbnb-base, which is still eslintrc-only. Its config also turns off `valid-jsdoc`/`require-jsdoc`, which ESLint 9 removed, and flat config rejects unknown rules, so it can't be loaded as is. The ESLint 8 tree accounted for 6 of the warnings: eslint itself, `@humanwhocodes/config-array`/`object-schema`, rimraf 3, glob 7 and inflight.
+  - Two alternatives were rejected. `eslint-config-airbnb-extended` hard-depends on typescript-eslint, React and Next plugins. A FlatCompat shim would mean stripping rules and overriding peer ranges on ESLint 9, which is itself near end of life.
+  - `eslint.config.js` replaces `.eslintrc` and `.eslintignore`. The ignores are carried over unchanged. It uses `@eslint/js` recommended, `eslint-plugin-n` `flat/recommended-script` and `@stylistic` (2-space indent, single quotes with `avoidEscape`, semicolons, always-multiline trailing commas, 1tbs, `max-len` 100).
+  - Carried over from airbnb or the old `.eslintrc`: `no-console`, `no-param-reassign` with airbnb's `props: true` options (still a warning), `no-await-in-loop`, `prefer-const`, `no-var`, `eqeqeq` and `global-require` (now `n/global-require`). `arrow-parens` stays off. `n/no-process-exit` is off because the service exits on purpose when it can't start. `eslint-plugin-import` was dropped: its peer range stops at ESLint 9, and `n/no-missing-require` covers unresolved requires.
+  - The rules were tuned to fit the existing code, so nothing was reformatted. The only code edits are directive cleanups. ESLint 10 reports unused disable directives, which surfaced two stale ones: `no-unused-vars` in `lib/middleware/error-handler.js` (`next` is used now) and `no-await-in-loop` in `lib/services/recipes/index.js` (no `await` is left in it). Both were removed. `import/no-dynamic-require` was also removed from `spec/unit/helpers/git-api-access.spec.js`.
+- **Left in place:** `@feral-auth/ts-simple-dsl@0.0.1` is deprecated by its publisher as an "alpha, pin exact" notice, and it's the only version. This repo already pins it exactly, so nothing here can clear the warning. Any change belongs in the ts-simple-dsl repo.
+
+**Verification:** after `rm -rf node_modules && npm ci`, only the ts-simple-dsl warning is printed. Lint is clean, 76 unit tests pass with coverage-check, 9 integration tests pass, and the pre-push hook passes. A probe file with `var`, an unused variable, double quotes and a missing require gets all five errors reported, so the new config is really linting.
+
+**Open notes**
+- `spec/helpers` is still excluded from lint, as before. Most of the DSL and driver code lives there, so it may be worth linting now.
