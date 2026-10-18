@@ -169,4 +169,4 @@ They call `http://localhost:3000/api/recipes-service` by default. To change that
 
 Nothing in the suite requires `lib/`. If the service gets something wrong, the test checks what it does today and is marked `// DocumentsCurrentBehavior`, with a note saying what it should do. There are none at the moment.
 
-Feature notes and decisions are kept in [`docs/`](docs/).
+Feature notes and decisions are kept in [`ai-changelogs`](https://github.com/ErikHage/ai-changelogs/tree/master/projects/recipes-service).
