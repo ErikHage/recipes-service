@@ -34,7 +34,8 @@ const titleCase = (alias) => alias
  * suffix, since it is the recipe's id in the API.
  *
  * `named` is the recipeName inside the file (default: the alias, title-cased);
- * `nutrition: 'none'` leaves the nutrition block out.
+ * `nutrition: 'no-serving-size'` leaves the serving size out of the nutrition
+ * block, and `nutrition: 'none'` leaves the whole block out.
  */
 const aRecipe = ({
   alias, named = titleCase(alias), keywords = [], nutrition = 'some',
@@ -57,6 +58,7 @@ const aRecipe = ({
     ...(keywords.length > 0 ? { keywords } : {}),
     ...(nutrition === 'none' ? {} : {
       nutrition: {
+        ...(nutrition === 'no-serving-size' ? {} : { servingSize: { type: 'cup', value: 1 } }),
         calories: 250, fats: 8, carbohydrates: 35, sugars: 6, protein: 7,
       },
     }),

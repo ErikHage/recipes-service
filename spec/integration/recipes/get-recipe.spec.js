@@ -21,6 +21,13 @@ describe('GET /recipes/:recipeId (integration)', () => {
     await recipes.checkRecipe('recipe: tomato-soup');
   });
 
+  it('fills in an empty serving size when the recipe\'s nutrition has none', async () => {
+    await github.hasRecipe('recipe: tomato-soup', 'nutrition: no-serving-size');
+    await recipeCache.refresh('expect: succeeds');
+
+    await recipes.checkRecipe('recipe: tomato-soup');
+  });
+
   it('finds no recipe for an unknown id', async () => {
     await github.hasRecipe('recipe: pancakes');
     await recipeCache.refresh('expect: succeeds');

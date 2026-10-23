@@ -40,11 +40,17 @@ const expectedSummary = (recipe) => ({
   filterMatchString: filterMatchString(recipe.content),
 });
 
+/** A nutrition block with no serving size gets an empty one. */
+const expectedNutrition = (nutrition) => ({
+  servingSize: { type: '', value: null },
+  ...nutrition,
+});
+
 /** The file's content with its id, and `nutrition: {}` when the file has none. */
 const expectedRecipe = (recipe) => ({
   recipeId: recipe.sha,
   ...recipe.content,
-  nutrition: recipe.content.nutrition || {},
+  nutrition: recipe.content.nutrition ? expectedNutrition(recipe.content.nutrition) : {},
 });
 
 /** Summaries in a fixed key order, so two lists compare by their text. */

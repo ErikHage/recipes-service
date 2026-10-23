@@ -94,11 +94,22 @@ const recipeProblems = (recipe) => {
     problem('nutrition is not an object ({} when the recipe has none)');
   } else {
     Object.keys(recipe.nutrition)
-      .filter((field) => !NUTRITION_FIELDS.includes(field))
+      .filter((field) => field !== 'servingSize' && !NUTRITION_FIELDS.includes(field))
       .forEach((field) => problem(`nutrition.${field} is not a known nutrition field`));
     NUTRITION_FIELDS
       .filter((field) => recipe.nutrition[field] !== undefined && !isNumberOrNull(recipe.nutrition[field]))
       .forEach((field) => problem(`nutrition.${field} is neither a number nor null`));
+
+    // the service fills in { type: '', value: null } when the file gives no serving size
+    const { servingSize } = recipe.nutrition;
+    if (Object.keys(recipe.nutrition).length > 0) {
+      if (!isObject(servingSize)) {
+        problem('nutrition.servingSize is not an object');
+      } else {
+        if (typeof servingSize.type !== 'string') problem('nutrition.servingSize.type is not a string');
+        if (!isNumberOrNull(servingSize.value)) problem('nutrition.servingSize.value is neither a number nor null');
+      }
+    }
   }
 
   return problems;

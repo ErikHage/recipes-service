@@ -48,6 +48,10 @@ describe('Recipes Serializer', () => {
     }];
     const keywords = ['some-keyword'];
     const nutrition = {
+      servingSize: {
+        type: 'some-type',
+        value: 'some-value',
+      },
       calories: 'some-calories',
       fats: 'some-fats',
       carbohydrates: 'some-carbs',
@@ -100,6 +104,24 @@ describe('Recipes Serializer', () => {
         const result = recipesSerializer.getRecipe.toResponse(recipe);
 
         expect(result.nutrition).to.deep.equal({});
+      });
+
+      it('should return an empty serving size when the nutrition has none', async () => {
+        const recipe = {
+          sha: recipeId,
+          recipeName,
+          prep: kindValueObj,
+          cook: kindValueObj,
+          yield: kindValueObj,
+          ingredients,
+          steps,
+          keywords,
+          nutrition: { calories: 'some-calories' },
+        };
+
+        const result = recipesSerializer.getRecipe.toResponse(recipe);
+
+        expect(result.nutrition.servingSize).to.deep.equal({ type: '', value: null });
       });
     });
   });

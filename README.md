@@ -65,11 +65,15 @@ curl http://localhost:3000/api/recipes-service/recipes/3f9c2e...
     { "id": 1, "text": "Mix everything" }
   ],
   "keywords": ["breakfast", "sweet"],
-  "nutrition": { "calories": 250, "fats": 8, "carbohydrates": 35, "sugars": 6, "protein": 7 }
+  "nutrition": {
+    "servingSize": { "type": "cup", "value": 1 },
+    "calories": 250, "fats": 8, "carbohydrates": 35, "sugars": 6, "protein": 7
+  }
 }
 ```
 
 - If the recipe has no nutrition data, `nutrition` is `{}`.
+- If the nutrition data has no `servingSize`, it is `{ "type": "", "value": null }`.
 - An unknown `recipeId` returns `404`:
 
 ```json
@@ -83,7 +87,7 @@ Every error the API raises comes back as JSON in this `errors` shape. An unexpec
 Each file in `my-recipes/json/` is named in kebab case (e.g. `tomato-soup.json`). It has the same fields as the `GET /recipes/:recipeId` response, except `recipeId`.
 
 - **Required:** `recipeName`, `prep`, `cook`, `yield`, `ingredients` and `steps`.
-- **Optional:** `keywords`, `nutrition` and an ingredient's `notes`.
+- **Optional:** `keywords`, `nutrition` (and its `servingSize`) and an ingredient's `notes`.
 
 ## Configuration
 

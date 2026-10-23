@@ -11,14 +11,15 @@ const createGithubDsl = (world, github) => ({
   /**
    * `recipe` (the alias, also the filename: `tomato-soup` -> tomato-soup.json),
    * optional `named` (the recipeName inside the file; default: the alias,
-   * title-cased), `keywords` (comma-separated) and `nutrition: some | none`.
+   * title-cased), `keywords` (comma-separated) and
+   * `nutrition: some | no-serving-size | none`.
    */
   async hasRecipe(...args) {
     const params = parseDslArgs(args, {
       recipe: alias(),
       named: optional(),
       keywords: optional().multiple({ separator: ',' }),
-      nutrition: optional().allowedValues('some', 'none').withDefault('some'),
+      nutrition: optional().allowedValues('some', 'no-serving-size', 'none').withDefault('some'),
     });
 
     world.nameRecipe(params.recipe, github.serves(aRecipe({
