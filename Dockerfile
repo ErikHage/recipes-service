@@ -51,4 +51,10 @@ EXPOSE 3000
 
 USER ${NODE}
 
+# Reports whether the process is serving; it restarts nothing by itself. The
+# slim image has no curl or wget, so node asks. The route touches neither
+# GitHub nor the recipe cache
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+    CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/api/recipes-service/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+
 CMD [ "npm", "start" ]

@@ -1,5 +1,6 @@
 const { createGithubDsl } = require('./github-dsl');
 const { createRecipeCacheDsl } = require('./recipe-cache-dsl');
+const { createHealthDsl } = require('./health-dsl');
 const { createRecipesDsl } = require('./recipes-dsl');
 const { createWorld } = require('./world');
 const { expectStepRejected } = require('./dsl-misuse');
@@ -15,12 +16,15 @@ const { expectStepRejected } = require('./dsl-misuse');
  */
 const createIntegrationDsl = () => {
   const world = createWorld();
-  const { github, recipeCache, recipes } = world.drivers;
+  const {
+    github, recipeCache, recipes, health,
+  } = world.drivers;
 
   return {
     github: createGithubDsl(world, github),
     recipeCache: createRecipeCacheDsl(world, recipeCache),
     recipes: createRecipesDsl(world, recipes),
+    health: createHealthDsl(world, health),
     misuse: { expectStepRejected },
     cleanup: () => world.cleanup(),
   };

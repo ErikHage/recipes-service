@@ -1,3 +1,4 @@
+const { createHealthDsl } = require('./health-dsl');
 const { createRecipesDsl } = require('./recipes-dsl');
 const { createWorld } = require('./world');
 const { expectStepRejected } = require('./dsl-misuse');
@@ -15,6 +16,7 @@ const createAcceptanceDsl = () => {
   const world = createWorld();
 
   return {
+    health: createHealthDsl(world, world.drivers.health),
     recipes: createRecipesDsl(world, world.drivers.recipes),
     misuse: { expectStepRejected },
     cleanup: () => world.cleanup(),
