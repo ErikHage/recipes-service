@@ -1,4 +1,5 @@
 const { createGithubDriver } = require('./github-driver');
+const { createHealthDriver } = require('./health-driver');
 const { createRecipeCacheDriver } = require('./recipe-cache-driver');
 const { createRecipesDriver } = require('./recipes-driver');
 
@@ -6,6 +7,7 @@ const { createRecipesDriver } = require('./recipes-driver');
  * One driver per thing the suite talks to, built once per spec file.
  *
  * - recipes: the HTTP API, over the in-process client
+ * - health: the health route, over the same client
  * - recipeCache: the app's cache refresh, over support/app.js
  * - github: the mocked GitHub repo the app loads from
  *
@@ -14,6 +16,7 @@ const { createRecipesDriver } = require('./recipes-driver');
  */
 const createDrivers = ({ client, recipeCache, githubMock }) => ({
   recipes: createRecipesDriver(client),
+  health: createHealthDriver(client),
   recipeCache: createRecipeCacheDriver(recipeCache),
   github: createGithubDriver(githubMock),
 });

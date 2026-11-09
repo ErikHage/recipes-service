@@ -1,3 +1,4 @@
+const { createHealthDriver } = require('./health-driver');
 const { createRecipesDriver } = require('./recipes-driver');
 
 /**
@@ -7,6 +8,7 @@ const { createRecipesDriver } = require('./recipes-driver');
  * caller to bind: a driver's methods take only the values they check.
  */
 const createDrivers = (client) => ({
+  health: createHealthDriver(client),
   recipes: createRecipesDriver(client),
 });
 
