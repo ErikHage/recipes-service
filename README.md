@@ -168,7 +168,7 @@ They call `http://localhost:3000/api/recipes-service` by default. To change that
 
 **How they're organized:**
 - **Specs** (`spec/acceptance/`) are written as prose, using `"name: value"` steps.
-- **DSL modules** (`spec/helpers/acceptance/dsl/`) parse those steps with [`@feral-auth/ts-simple-dsl`](https://www.npmjs.com/package/@feral-auth/ts-simple-dsl). It's pinned to an exact version because it's a pre-1.0 alpha.
+- **DSL modules** (`spec/helpers/acceptance/dsl/`) parse those steps with [`@feral-auth/ts-simple-dsl`](https://www.npmjs.com/package/@feral-auth/ts-simple-dsl). It follows semver from 1.0.0, so it's installed with a `^1` range.
 - **Drivers** (`spec/helpers/acceptance/drivers/`) make the HTTP calls and hold every assertion.
 
 Nothing in the suite requires `lib/`. If the service gets something wrong, the test checks what it does today and is marked `// DocumentsCurrentBehavior`, with a note saying what it should do. There are none at the moment.
