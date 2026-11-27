@@ -63,6 +63,13 @@ const initApp = async (recipePrimer) => {
 
     server.on('error', onError(port));
     server.on('listening', onListening(server, recipePrimer));
+
+    // As PID 1 in Docker, node ignores these signals unless it handles them
+    // itself. process.exit, because the primer's daily refresh timer would
+    // otherwise keep the process alive
+    const shutDown = () => server.close(() => process.exit(0));
+    process.on('SIGTERM', shutDown);
+    process.on('SIGINT', shutDown);
   } catch (err) {
     console.log(err);
     process.exit(1);

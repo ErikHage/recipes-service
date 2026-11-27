@@ -57,4 +57,5 @@ USER ${NODE}
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
     CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/api/recipes-service/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
 
-CMD [ "npm", "start" ]
+# node, not npm, is PID 1, so the stop signal reaches the handler in bin/server
+CMD [ "node", "bin/server" ]
